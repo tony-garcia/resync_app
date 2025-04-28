@@ -4,6 +4,7 @@ DRF API viewsets
 """
 from rest_framework import viewsets
 
+from .filters import JSONFieldFilter
 from .models import Compound
 from .serializers import CompoundSerializer
 
@@ -11,6 +12,7 @@ from .serializers import CompoundSerializer
 class CompoundViewSet(viewsets.ModelViewSet):
     queryset = Compound.objects.all()
     serializer_class = CompoundSerializer
+    filter_backends = [JSONFieldFilter]
 
     def __clean_data(self, data: dict) -> dict:
         """Remove all leading and trailing spaces from string values in data dictionary
