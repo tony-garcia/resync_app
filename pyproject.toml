@@ -10,5 +10,14 @@ dependencies = [
     "djangorestframework>=3.16.0",
     "markdown>=3.8",
     "psycopg>=3.2.6",
+    "pytest>=8.3.5",
+    "pytest-django>=4.11.1",
     "rdkit>=2024.9.6",
 ]
+
+[tool.black]
+line-length = 120
+
+[tool.isort]
+profile = "black"
+line_length = 120

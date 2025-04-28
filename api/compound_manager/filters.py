@@ -15,8 +15,7 @@ class JSONFieldFilter(filters.BaseFilterBackend):
         "gte": "__gte",  # greater than or equal
         "lt": "__lt",  # less than
         "lte": "__lte",  # less than or equal
-        "contains": "__contains",  # contains (case-sensitive)
-        "icontains": "__icontains",  # contains (case-insensitive)
+        "contains": "__icontains",  # contains (case-insensitive)
         "startswith": "__startswith",  # starts with
         "endswith": "__endswith",  # ends with
         "has_key": "__has_key",  # JSON key exists
@@ -49,9 +48,7 @@ class JSONFieldFilter(filters.BaseFilterBackend):
 
             # full-text search
             elif prop == "search" and value:
-                queryset = queryset.extra(
-                    where=[f"{json_field}::text ILIKE %s"], params=[f"%{value}%"]
-                )
+                queryset = queryset.extra(where=[f"{json_field}::text ILIKE %s"], params=[f"%{value}%"])
         if filter_conditions:
             queryset = queryset.filter(**filter_conditions)
 

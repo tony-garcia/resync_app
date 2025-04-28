@@ -3,7 +3,8 @@ services:
     platform: linux/amd64
     build: .
     environment:
-      - PYTHONPATH=/app
+      - PYTHONPATH=/app/api
+      - DJANGO_SETTINGS_MODULE=config.settings
     volumes:
       - ./api:/app/api
     ports:
