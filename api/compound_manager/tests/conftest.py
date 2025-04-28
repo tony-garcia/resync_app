@@ -1,4 +1,5 @@
 import pytest
+from django.contrib.auth.models import User
 from rest_framework.test import APIClient
 
 from compound_manager.models import Compound
@@ -7,6 +8,14 @@ from compound_manager.models import Compound
 @pytest.fixture
 def api_client():
     return APIClient()
+
+
+# we could use the below fixture if API endpoints required authentication
+# @pytest.fixture
+# def authenticated_client(api_client):
+#     user = User.objects.create_user(username='testuser', password='password')
+#     api_client.force_authenticate(user=user)
+#     return api_client
 
 
 @pytest.fixture
