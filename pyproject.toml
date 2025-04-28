@@ -10,4 +10,5 @@ dependencies = [
     "djangorestframework>=3.16.0",
     "markdown>=3.8",
     "psycopg>=3.2.6",
+    "rdkit>=2024.9.6",
 ]
