@@ -25,7 +25,8 @@ class CompoundSerializer(serializers.ModelSerializer):
             allowed_types = (str, int, float)
             invalid_keys = []
             for key, value in compound_data.items():
-                if not isinstance(value, allowed_types):
+                # for some reason isinstance(True/False, allowe_types) returns True so we have to check booleans explicitly
+                if isinstance(value, bool) or not isinstance(value, allowed_types):
                     invalid_keys.append(key)
             if invalid_keys:
                 errors["data"] = (
