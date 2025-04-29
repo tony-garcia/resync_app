@@ -16,10 +16,17 @@ Including another URLconf
 """
 
 from django.contrib import admin
+from django.shortcuts import redirect
 from django.urls import include, path
+
+
+def index(request):
+    return redirect("/api/")
+
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api-auth/", include("rest_framework.urls")),
     path("api/", include("compound_manager.urls")),
+    path("", index),
 ]
