@@ -5,6 +5,7 @@ Tests for CRUD API
 from unittest.mock import patch
 
 import pytest
+from django.db.utils import IntegrityError
 from django.urls import reverse
 from rest_framework import status
 
@@ -22,6 +23,8 @@ VALID_COMPOUND_DATA = {
 }
 INVALID_COMPOUND_DATA = {"name": "Invalid Compound", "properties": {"soluble": True}}  # Nested dict not allowed
 
+COMPOUND_URL = reverse("compound-list")
+
 
 @pytest.fixture
 def compound_data():
@@ -36,7 +39,7 @@ class TestCompoundCRUD:
     # CREATE tests
     def test_create_compound_valid(self, api_client):
         """Test creating a compound with valid data"""
-        url = reverse("compound-list")
+        url = COMPOUND_URL
         data = {
             "smiles": "CC(C)CC1=CC=C(C=C1)C(C)C(=O)O",  # Ibuprofen
             "data": {"name": "Ibuprofen", "type": "NSAID", "score": 88},
@@ -49,7 +52,7 @@ class TestCompoundCRUD:
 
     def test_create_compound_invalid_smiles(self, api_client):
         """Test creating a compound with invalid SMILES"""
-        url = reverse("compound-list")
+        url = COMPOUND_URL
         data = {"smiles": INVALID_SMILES, "data": VALID_COMPOUND_DATA}
         response = api_client.post(url, data=data, format="json")
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -58,7 +61,7 @@ class TestCompoundCRUD:
 
     def test_create_compound_invalid_data(self, api_client):
         """Test creating a compound with invalid data types"""
-        url = reverse("compound-list")
+        url = COMPOUND_URL
         data = {"smiles": VALID_SMILES, "data": INVALID_COMPOUND_DATA}
         response = api_client.post(url, data=data, format="json")
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -67,7 +70,7 @@ class TestCompoundCRUD:
 
     def test_create_compound_strip_whitespace(self, api_client):
         """Test that string values in data have whitespace stripped"""
-        url = reverse("compound-list")
+        url = COMPOUND_URL
         data = {"smiles": VALID_SMILES, "data": {"name": "  Aspirin  ", "type": " NSAID ", "score": 85}}
         response = api_client.post(url, data=data, format="json")
         assert response.status_code == status.HTTP_201_CREATED
@@ -75,10 +78,43 @@ class TestCompoundCRUD:
         assert compound.data["name"] == "Aspirin"
         assert compound.data["type"] == "NSAID"
 
+    def test_bulk_create_compounds(self, api_client):
+        """Test bulk creation of multiple compounds"""
+        payload = [
+            {"smiles": "CCO", "data": {"name": "ethanol", "source": "lab "}},
+            {"smiles": "C1=CC=CC=C1", "data": {"name": " benzene", "source": "catalog"}},
+        ]
+
+        response = api_client.post(COMPOUND_URL, payload, content_type="application/json")
+
+        assert response.status_code == status.HTTP_201_CREATED
+        assert isinstance(response.data, list)
+        assert len(response.data) == 2
+
+        # Check that strings in data were stripped
+        compound_1 = Compound.objects.get(smiles="CCO")
+        compound_2 = Compound.objects.get(smiles="C1=CC=CC=C1")
+
+        assert compound_1.data["source"] == "lab"
+        assert compound_2.data["name"] == "benzene"
+
+    def test_bulk_create_rejects_invalid_input(self, api_client):
+        """Test validation of bulk creation"""
+        payload = [
+            {"smiles": "CO", "data": {"info": "valid"}},
+            {"smiles": "CO", "data": {"info": "duplicate"}},  # duplicate SMILES
+        ]
+
+        with pytest.raises(IntegrityError):  # fails SMILES string uniqueness
+            response = api_client.post(COMPOUND_URL, payload, content_type="application/json")
+            assert response.status_code == status.HTTP_400_BAD_REQUEST
+            assert "smiles" in str(response.data).lower()
+            assert Compound.objects.count() == 0  # Nothing should be inserted
+
     # READ tests
     def test_list_compounds(self, api_client, setup_test_data):
         """Test listing all compounds"""
-        url = reverse("compound-list")
+        url = COMPOUND_URL
         response = api_client.get(url)
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data) == 8
@@ -148,14 +184,14 @@ class TestCompoundCRUD:
     def test_rdkit_validation_called(self, mock_mol_from_smiles, api_client):
         """Test that RDKit validation is called during serializer validation"""
         mock_mol_from_smiles.return_value = "Valid Molecule"
-        url = reverse("compound-list")
+        url = COMPOUND_URL
         data = {"smiles": VALID_SMILES, "data": VALID_COMPOUND_DATA}
         api_client.post(url, data=data, format="json")
         mock_mol_from_smiles.assert_called_once_with(VALID_SMILES, sanitize=False)
 
     def test_unique_smiles_constraint(self, api_client, compound_data):
         """Test that duplicate SMILES strings are rejected"""
-        url = reverse("compound-list")
+        url = COMPOUND_URL
         data = {"smiles": VALID_SMILES, "data": {"name": "Duplicate Compound"}}  # Same as the one in compound_data
         response = api_client.post(url, data=data, format="json")
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -163,7 +199,7 @@ class TestCompoundCRUD:
 
     def test_data_types_validation(self, api_client):
         """Test validation of data types in compound data"""
-        url = reverse("compound-list")
+        url = COMPOUND_URL
         data = {
             "smiles": VALID_SMILES,
             "data": {
