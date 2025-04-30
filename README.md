@@ -15,6 +15,11 @@ Once you have docker running, execute this command to spin up the API:
 
 Once the containers are running, the API is accessible at http://localhost:8000/api/
 
+To stop the application run one of the following commands
+
+    docker compose stop  # stops the containers
+    docker compose down  # stops the containers and removes them
+
 ## API Usage
 
 ### CRUD Operations
@@ -34,6 +39,20 @@ resp = httpx.post(
         "data": {"name": "Caffeine", "type": "Stimulant", "classification": "OTC", "score": 75},
     },
 )
+
+# BULK CREATE
+resp = httpx.post(
+    os.path.join(BASE_URL, "compounds/"),
+    json=[
+    {
+        "smiles": "CN1C=NC2=C1C(=O)N(C(=O)N2C)C",
+        "data": {"name": "Caffeine", "type": "Stimulant", "classification": "OTC", "score": 75},
+    },
+    {
+        "smiles": "CC(=O)OC1=CC=CC=C1C(=O)O",
+        "data": {"name": "Aspirin", "type": "NSAID", "classification": "OTC", "score": 85},
+    }
+])
 
 # READ (get)
 resp = httpx.get(os.path.join(BASE_URL, "compounds/1/"))
