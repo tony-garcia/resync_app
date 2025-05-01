@@ -5,6 +5,7 @@
 .idea
 
 # django/python
+.venv
 __pycache__
 *.py[oc]
 .mypy_cache

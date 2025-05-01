@@ -1,0 +1,92 @@
+{
+  "plugins": [
+    "react"
+  ],
+  "extends": [
+    "airbnb",
+    "airbnb/hooks",
+    "plugin:prettier/recommended",
+    "plugin:import/errors",
+    "plugin:react/recommended",
+    "plugin:react/jsx-runtime",
+    "plugin:react-hooks/recommended",
+    "plugin:jsx-a11y/recommended",
+    "plugin:@tanstack/eslint-plugin-query/recommended"
+  ],
+"parserOptions": {
+    "ecmaVersion": 2021,
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "jsx": true
+    }
+},
+  "rules": {
+    "camelcase": [
+      "error",
+      {
+        "properties": "never",
+        "ignoreDestructuring": true,
+        "ignoreImports": true
+      }
+    ],
+    "consistent-return": 0,
+    "import/no-cycle": 0,
+    "import/prefer-default-export": "warn",
+    "no-unused-vars": "warn",
+    "no-use-before-define": 0,
+    "no-nested-ternary": 0,
+    "no-plusplus": [
+      "warn",
+      {
+        "allowForLoopAfterthoughts": true
+      }
+    ],
+    "no-restricted-syntax": [
+      "warn",
+      {
+        "selector": "ForInStatement",
+        "message": "for..in loops iterate over the entire prototype chain, which is virtually never what you want. Use Object.{keys,values,entries}, and iterate over the resulting array."
+      },
+      {
+        "selector": "LabeledStatement",
+        "message": "Labels are a form of GOTO; using them makes code confusing and hard to maintain and understand."
+      },
+      {
+        "selector": "WithStatement",
+        "message": "`with` is disallowed in strict mode because it makes code impossible to predict and optimize."
+      }
+    ],
+    "prefer-destructuring": 0,
+    "prettier/prettier": "warn",
+    "react/button-has-type": 0,
+    "react/destructuring-assignment": 0,
+    "react/forbid-prop-types": 0,
+    "react/jsx-filename-extension": [
+      1,
+      {
+        "allow": "as-needed"
+      }
+    ],
+    "react/jsx-pascal-case": [
+      1,
+      {
+        "allowNamespace": true
+      }
+    ],
+    "react/jsx-props-no-spreading": 0,
+    "react/no-unstable-nested-components": [
+      "warn",
+      {
+        "allowAsProps": true
+      }
+    ],
+    "react/require-default-props": 0
+  },
+  "globals": {
+    "localStorage": "readonly",
+    "FormData": "readonly",
+    "document": "readonly",
+    "fetch": "readonly",
+    "window": "readonly"
+  }
+}
