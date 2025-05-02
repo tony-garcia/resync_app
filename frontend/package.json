@@ -1,0 +1,49 @@
+{
+  "name": "resync_app_frontend",
+  "version": "1.0.0",
+  "description": "frontend to compound management app",
+  "scripts": {
+    "start": "vite --host",
+    "build": "NODE_OPTIONS=--max_old_space_size=4096 vite build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tony-garcia/resync_app.git"
+  },
+  "author": "Tony Garcia",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tony-garcia/resync_app/issues"
+  },
+  "homepage": "https://github.com/tony-garcia/resync_app#readme",
+  "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@fontsource/roboto": "^5.2.5",
+    "@mui/icons-material": "^7.0.2",
+    "@mui/material": "^7.0.2",
+    "@rdkit/rdkit": "^2025.3.2-1.0.0",
+    "@vitejs/plugin-react": "^4.4.1",
+    "axios": "^1.9.0",
+    "lodash": "^4.17.21",
+    "prop-types": "^15.8.1",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-icons": "^5.5.0",
+    "react-router": "^7.5.3",
+    "vite": "^6.3.4",
+    "vite-plugin-node-polyfills": "^0.23.0"
+  },
+  "devDependencies": {
+    "@tanstack/eslint-plugin-query": "^5.74.7",
+    "eslint": "^8.57.1",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-config-prettier": "^10.1.2",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-prettier": "^5.2.6",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^4.6.2",
+    "prettier": "^3.5.3"
+  }
+}
