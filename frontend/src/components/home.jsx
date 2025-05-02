@@ -1,25 +1,42 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useAPI } from "../../hooks";
 
 import {
   Button,
+  Box,
+  IconButton,
+  Card,
+  CardContent,
   Typography,
+  Paper,
   TextField,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-  Grid,
+  List,
+  ListItem,
+  ListItemText,
+  Divider,
 } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import DeleteIcon from '@mui/icons-material/Delete';
+
+import { applyType } from '../utils';
 
 const initialFormData = {
   smiles: '',
-  data: '',
 };
 
 function Home() {
   const [formOpen, setFormOpen] = useState(false);
   const [formData, setFormData] = useState(initialFormData);
+  // State for properties
+  const [properties, setProperties] = useState([]);
+
+  // State for current input fields
+  const [currentProperty, setCurrentProperty] = useState('');
+  const [currentValue, setCurrentValue] = useState('');
 
   const { data, isLoading, error } = useAPI({ url: '/api/compounds/' }, {});
 
@@ -34,16 +51,49 @@ function Home() {
     }))
   };
 
+  // Function to add a new property
+  const addProperty = () => {
+    if (currentProperty.trim() !== '') {
+      // Create new property object
+      const newProperty = {
+        id: Date.now(),
+        name: currentProperty,
+        value: currentValue,
+      };
+
+      // Add to properties array
+      setProperties([...properties, newProperty]);
+
+      // Reset input fields
+      setCurrentProperty('');
+      setCurrentValue('');
+    }
+  };
+
+  // Function to remove a property
+  const removeProperty = (id) => {
+    setProperties(properties.filter((property) => property.id !== id));
+  };
+
   const handleSubmit = (event) => {
     event.preventDefault();
-    // Here you would typically send the data to your backend
-    console.log('Form submitted:', formData);
+
+    // Create object from properties
+    const compoundData = {};
+    properties.forEach((prop) => {
+      compoundData[prop.name] = applyType(prop.value);
+    });
+
+    const payLoad = { ...formData, data: compoundData };
+
+    console.log('Form submitted:', payLoad);
 
     // Close the modal after submission
     handleCloseForm();
 
     // Reset form
     setFormData(initialFormData);
+    setProperties([]);
   };
 
   return (
@@ -60,8 +110,8 @@ function Home() {
 
         <form onSubmit={handleSubmit}>
           <DialogContent>
-            <Grid container spacing={2} sx={{ mt: 1 }}>
-              <Grid item xs={12} sm={6}>
+            <Card>
+              <CardContent>
                 <TextField
                   name="smiles"
                   label="SMILES String"
@@ -71,19 +121,65 @@ function Home() {
                   required
                   margin="dense"
                 />
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  name="data"
-                  label="Data"
-                  onChange={handleChange}
-                  fullWidth
-                  required
-                  margin="dense"
-                />
-              </Grid>
-            </Grid>
+                <Box mb={3} display="flex" alignItems="flex-end">
+                  <TextField
+                    label="Property Name"
+                    value={currentProperty}
+                    onChange={(e) => setCurrentProperty(e.target.value)}
+                    variant="outlined"
+                    fullWidth
+                    sx={{ mr: 1 }}
+                  />
+                  <TextField
+                    label="Property Value"
+                    value={currentValue}
+                    onChange={(e) => setCurrentValue(e.target.value)}
+                    variant="outlined"
+                    fullWidth
+                    sx={{ mr: 1 }}
+                  />
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    startIcon={<AddIcon />}
+                    onClick={addProperty}
+                    sx={{ height: 56 }}
+                  >
+                    Add
+                  </Button>
+                </Box>
+                <Paper variant="outlined" sx={{ mb: 3 }}>
+                  {properties.length > 0 ? (
+                    <List>
+                      {properties.map((property, index) => (
+                        <React.Fragment key={property.id}>
+                          {index > 0 && <Divider />}
+                          <ListItem
+                            secondaryAction={
+                              <IconButton
+                                edge="end"
+                                aria-label="delete"
+                                onClick={() => removeProperty(property.id)}
+                              >
+                                <DeleteIcon />
+                              </IconButton>
+                            }
+                          >
+                            <ListItemText primary={property.name} secondary={property.value} />
+                          </ListItem>
+                        </React.Fragment>
+                      ))}
+                    </List>
+                  ) : (
+                    <Box py={3} textAlign="center">
+                      <Typography color="textSecondary">
+                        No properties added yet. Add some above!
+                      </Typography>
+                    </Box>
+                  )}
+                </Paper>
+              </CardContent>
+            </Card>
           </DialogContent>
 
           <DialogActions sx={{ px: 3, pb: 2 }}>
