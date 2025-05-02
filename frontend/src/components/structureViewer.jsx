@@ -14,7 +14,7 @@ import { Edit, Delete } from '@mui/icons-material';
 
 import MoleculeStructure from './moleculeStructure';
 
-function StructureViewer({ compounds }) {
+function StructureViewer({ compounds, editHandler, deleteHandler }) {
   return (
     <Box sx={{ margin: '30px' }}>
       <Grid container spacing={2}>
@@ -36,10 +36,10 @@ function StructureViewer({ compounds }) {
                 </div>
               </CardContent>
               <CardActions>
-                <IconButton edge="end" onClick={() => console.log(compound.compound_id)}>
+                <IconButton edge="end" onClick={() => editHandler(compound.compound_id)}>
                   <Edit />
                 </IconButton>
-                <IconButton edge="end" onClick={() => console.log(compound.compound_id)}>
+                <IconButton edge="end" onClick={() => deleteHandler(compound.compound_id)}>
                   <Delete />
                 </IconButton>
               </CardActions>

@@ -26,7 +26,7 @@ import { useAPI } from '../../hooks';
 import { applyType } from '../utils';
 
 const initialFormData = {
-  id: null,
+  compound_id: null,
   smiles: '',
 };
 
@@ -41,10 +41,13 @@ function Home() {
   const [currentValue, setCurrentValue] = useState('');
 
   const { data, isLoading, refresh, error } = useAPI({ url: '/api/compounds/' }, []);
-  console.log({ data });
 
   const handleOpenForm = () => setFormOpen(true);
-  const handleCloseForm = () => setFormOpen(false);
+  const handleCloseForm = () => {
+    setFormData(initialFormData);
+    setProperties([]);
+    setFormOpen(false);
+  };
 
   const handleChange = ({ target }) => {
     const { value } = target;
@@ -90,18 +93,24 @@ function Home() {
         console.error('status:', error.response.status);
       }
     } finally {
-      // Close the modal after submission
+      // Close the modal and clear values after submission
       handleCloseForm();
-      // Reset form
-      setFormData(initialFormData);
-      setProperties([]);
     }
-  }
+  };
 
   const updateCompound = async (data) => {
-    console.log('update');
-    console.log({ data });
-  }
+    try {
+      const response = await axios.put(`/api/compounds/${data.compound_id}/`, data);
+      refresh();
+    } catch (error) {
+      console.error('An error occurred!');
+      console.error('data:', error.response.data);
+      console.error('status:', error.response.status);
+    } finally {
+      // Close the modal and clear values after submission
+      handleCloseForm();
+    }
+  };
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -112,10 +121,35 @@ function Home() {
       compoundData[prop.name] = applyType(prop.value);
     });
     const payLoad = { ...formData, data: compoundData };
-    if (payLoad.id) {
+    if (payLoad.compound_id) {
       updateCompound(payLoad);
     } else {
       createCompound(payLoad);
+    }
+  };
+
+  const handleEdit = (id) => {
+    const compound = data.find((c) => c.compound_id === id);
+    let compoundProperties = [];
+    for (const [key, value] of Object.entries(compound.data)) {
+      compoundProperties = [...compoundProperties, { id: key, name: key, value: value.toString() }];
+    }
+    setFormData(compound);
+    setProperties(compoundProperties);
+    handleOpenForm();
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      const response = await axios.delete(`/api/compounds/${id}/`);
+      refresh();
+    } catch (error) {
+      console.error('An error occurred!');
+      console.error('data:', error.response.data);
+      console.error('status:', error.response.status);
+    } finally {
+      // Close the modal and clear values after submission
+      handleCloseForm();
     }
   };
 
@@ -126,11 +160,11 @@ function Home() {
       </Typography>
       <div style={{ textAlign: 'center', margin: '30px' }}>
         <Button variant="contained" onClick={handleOpenForm}>Add Compound</Button>
-        <StructureViewer compounds={data} />
+        <StructureViewer compounds={data} editHandler={handleEdit} deleteHandler={handleDelete} />
       </div>
 
       <Dialog open={formOpen} onClose={handleCloseForm} maxWidth="md">
-        <DialogTitle>Add Compound</DialogTitle>
+        <DialogTitle>{formData.compound_id ? 'Edit Compound' : 'Add Compound'}</DialogTitle>
 
         <form onSubmit={handleSubmit}>
           <DialogContent>
