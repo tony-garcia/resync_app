@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import {
+  Alert,
   Button,
   Box,
   Card,
@@ -14,6 +15,7 @@ import {
   ListItem,
   ListItemText,
   Paper,
+  Snackbar,
   TextField,
   Typography,
 } from '@mui/material';
@@ -32,6 +34,9 @@ const initialFormData = {
 
 function Home() {
   const [formOpen, setFormOpen] = useState(false);
+  const [message, setMessage] = useState('');
+  const [messageOpen, setMessageOpen] = useState(false);
+  const [messageType, setMessageType] = useState('');
   const [formData, setFormData] = useState(initialFormData);
   // State for properties
   const [properties, setProperties] = useState([]);
@@ -55,6 +60,20 @@ function Home() {
       ...prevData,
       smiles: value,
     }));
+  };
+
+  const showMessage = (text, alertType) => {
+    setMessage(text);
+    setMessageType(alertType);
+    setMessageOpen(true);
+  };
+
+  const handleCloseMessage = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+
+    setMessageOpen(false);
   };
 
   // Function to add a new property
@@ -86,11 +105,11 @@ function Home() {
       const response = await axios.post('/api/compounds/', data);
       // reload compound data
       refresh();
+      showMessage('Compound created!');
     } catch (error) {
       if (error.response) {
-        console.error('An error occurred!');
-        console.error('data:', error.response.data);
-        console.error('status:', error.response.status);
+        const errorMessage = error.response.data?.smiles[0] || 'An error occurred!';
+        showMessage(errorMessage, 'error');
       }
     } finally {
       // Close the modal and clear values after submission
@@ -102,10 +121,10 @@ function Home() {
     try {
       const response = await axios.put(`/api/compounds/${data.compound_id}/`, data);
       refresh();
+      showMessage('Compound updated!');
     } catch (error) {
-      console.error('An error occurred!');
-      console.error('data:', error.response.data);
-      console.error('status:', error.response.status);
+      const errorMessage = error.response.data?.smiles[0] || 'An error occurred!';
+      showMessage(errorMessage, 'error');
     } finally {
       // Close the modal and clear values after submission
       handleCloseForm();
@@ -142,11 +161,10 @@ function Home() {
   const handleDelete = async (id) => {
     try {
       const response = await axios.delete(`/api/compounds/${id}/`);
+      showMessage('Compound deleted.');
       refresh();
     } catch (error) {
-      console.error('An error occurred!');
-      console.error('data:', error.response.data);
-      console.error('status:', error.response.status);
+      showMessage('An error occurred!', 'error');
     } finally {
       // Close the modal and clear values after submission
       handleCloseForm();
@@ -250,6 +268,16 @@ function Home() {
           </DialogActions>
         </form>
       </Dialog>
+      <Snackbar open={messageOpen} autoHideDuration={6000} onClose={handleCloseMessage}>
+        <Alert
+          onClose={handleCloseMessage}
+          severity={messageType}
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          {message}
+        </Alert>
+      </Snackbar>
     </>
   );
 }
