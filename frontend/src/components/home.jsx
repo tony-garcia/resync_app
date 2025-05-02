@@ -19,11 +19,11 @@ import {
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
-import axios from "axios";
+import axios from 'axios';
 
-import { useAPI } from "../../hooks";
+import StructureViewer from './structureViewer';
+import { useAPI } from '../../hooks';
 import { applyType } from '../utils';
-
 
 const initialFormData = {
   id: null,
@@ -40,7 +40,8 @@ function Home() {
   const [currentProperty, setCurrentProperty] = useState('');
   const [currentValue, setCurrentValue] = useState('');
 
-  const { data, isLoading, refresh, error } = useAPI({ url: '/api/compounds/' }, {});
+  const { data, isLoading, refresh, error } = useAPI({ url: '/api/compounds/' }, []);
+  console.log({ data });
 
   const handleOpenForm = () => setFormOpen(true);
   const handleCloseForm = () => setFormOpen(false);
@@ -49,8 +50,8 @@ function Home() {
     const { value } = target;
     setFormData((prevData) => ({
       ...prevData,
-      smiles: value
-    }))
+      smiles: value,
+    }));
   };
 
   // Function to add a new property
@@ -98,8 +99,8 @@ function Home() {
   }
 
   const updateCompound = async (data) => {
-    console.log('update')
-    console.log({ data })
+    console.log('update');
+    console.log({ data });
   }
 
   const handleSubmit = (event) => {
@@ -123,8 +124,9 @@ function Home() {
       <Typography style={{ fontSize: '2em' }} align="center" variant="h1">
         Compound Manager
       </Typography>
-      <div style={{ textAlign: "center", margin: '30px' }}>
+      <div style={{ textAlign: 'center', margin: '30px' }}>
         <Button variant="contained" onClick={handleOpenForm}>Add Compound</Button>
+        <StructureViewer compounds={data} />
       </div>
 
       <Dialog open={formOpen} onClose={handleCloseForm} maxWidth="md">
