@@ -2,6 +2,9 @@ import { createRoot } from 'react-dom/client';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 
+import Wrapper from './components/app/wrapper';
+import Home from './components/home';
+
 import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
@@ -13,15 +16,14 @@ const darkTheme = createTheme({
   },
 });
 
-
 const container = document.getElementById('root');
 const root = createRoot(container);
-
-import Home from './components/home';
 
 root.render(
   <ThemeProvider theme={darkTheme}>
     <CssBaseline />
-    <Home />
-  </ThemeProvider>
+    <Wrapper>
+      <Home />
+    </Wrapper>
+  </ThemeProvider>,
 );
