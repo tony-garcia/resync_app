@@ -1,30 +1,32 @@
 import React, { useState } from "react";
-import { useAPI } from "../../hooks";
-
 import {
   Button,
   Box,
-  IconButton,
   Card,
   CardContent,
-  Typography,
-  Paper,
-  TextField,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
+  Divider,
+  IconButton,
   List,
   ListItem,
   ListItemText,
-  Divider,
+  Paper,
+  TextField,
+  Typography,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
+import axios from "axios";
 
+import { useAPI } from "../../hooks";
 import { applyType } from '../utils';
 
+
 const initialFormData = {
+  id: null,
   smiles: '',
 };
 
@@ -38,16 +40,16 @@ function Home() {
   const [currentProperty, setCurrentProperty] = useState('');
   const [currentValue, setCurrentValue] = useState('');
 
-  const { data, isLoading, error } = useAPI({ url: '/api/compounds/' }, {});
+  const { data, isLoading, refresh, error } = useAPI({ url: '/api/compounds/' }, {});
 
   const handleOpenForm = () => setFormOpen(true);
   const handleCloseForm = () => setFormOpen(false);
 
-  const handleChange = (event) => {
-    const { name, value, checked, type } = event.target;
+  const handleChange = ({ target }) => {
+    const { value } = target;
     setFormData((prevData) => ({
       ...prevData,
-      [name]: type === 'checkbox' ? checked : value
+      smiles: value
     }))
   };
 
@@ -75,6 +77,31 @@ function Home() {
     setProperties(properties.filter((property) => property.id !== id));
   };
 
+  const createCompound = async (data) => {
+    try {
+      const response = await axios.post('/api/compounds/', data);
+      // reload compound data
+      refresh();
+    } catch (error) {
+      if (error.response) {
+        console.error('An error occurred!');
+        console.error('data:', error.response.data);
+        console.error('status:', error.response.status);
+      }
+    } finally {
+      // Close the modal after submission
+      handleCloseForm();
+      // Reset form
+      setFormData(initialFormData);
+      setProperties([]);
+    }
+  }
+
+  const updateCompound = async (data) => {
+    console.log('update')
+    console.log({ data })
+  }
+
   const handleSubmit = (event) => {
     event.preventDefault();
 
@@ -83,17 +110,12 @@ function Home() {
     properties.forEach((prop) => {
       compoundData[prop.name] = applyType(prop.value);
     });
-
     const payLoad = { ...formData, data: compoundData };
-
-    console.log('Form submitted:', payLoad);
-
-    // Close the modal after submission
-    handleCloseForm();
-
-    // Reset form
-    setFormData(initialFormData);
-    setProperties([]);
+    if (payLoad.id) {
+      updateCompound(payLoad);
+    } else {
+      createCompound(payLoad);
+    }
   };
 
   return (
